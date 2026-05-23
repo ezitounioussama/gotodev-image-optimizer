@@ -1,4 +1,5 @@
-import { readFileSync } from 'node:fs'
+import { readFileSync, writeFileSync } from 'node:fs'
+import { join } from 'node:path'
 import sharp from 'sharp'
 import { contentHash, sriHash } from '../utils/hash.ts'
 import type { AnalysisResult } from './analyzer.ts'
@@ -106,6 +107,7 @@ export async function encodeImage(
     const hash = contentHash(Buffer.from(sanitized))
     const filename = `${hash}.svg`
     const svgBuffer = Buffer.from(sanitized)
+    writeFileSync(join(options.outDir, filename), svgBuffer)
 
     return {
       src: filename,
@@ -135,6 +137,7 @@ export async function encodeImage(
     const webpBuffer = await img.webp({ quality: 75 }).toBuffer()
     const hash = contentHash(webpBuffer)
     const filename = `${hash}.webp`
+    writeFileSync(join(options.outDir, filename), webpBuffer)
 
     return {
       src: filename,

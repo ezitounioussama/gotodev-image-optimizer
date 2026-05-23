@@ -1,9 +1,10 @@
-# gotodev-image-optimizer
+# vite-image-react
 
-**Content-aware, device-adaptive image optimizer for Vite + React.**  
-Surpasses Next.js Image in perceptual quality at equal or smaller file sizes.
+**Content-aware, device-adaptive image optimizer for Vite + React.**
 
-[![npm version](https://img.shields.io/npm/v/gotodev-image-optimizer.svg)](https://www.npmjs.com/package/gotodev-image-optimizer)
+Surpasses `next/image` in perceptual quality at equal or smaller file sizes. Works with any Vite project, not locked to any framework.
+
+[![npm version](https://img.shields.io/npm/v/vite-image-react.svg)](https://www.npmjs.com/package/vite-image-react)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node](https://img.shields.io/badge/node-%3E%3D22-brightgreen)](https://nodejs.org)
 [![Vite](https://img.shields.io/badge/vite-%3E%3D7-blueviolet)](https://vitejs.dev)
@@ -35,30 +36,23 @@ Every image is divided into 64×64 tiles and analyzed:
 
 ## Features
 
-**Perceptually-optimized quality** — 64×64 tile saliency drives quality per region. Faces, text, and detail get higher quality; backgrounds compress harder.
-
-**Saliency-driven preprocessing** — important tiles are sharpened before encoding, preserving detail where it matters.
-
-**Skin-tone face detection** — automatic quality boost around skin-colored regions. Zero extra dependencies.
-
-**SSIM auto-tune** — finds the lowest quality where SSIM >= 0.97, saving 20–40% file size with no visible loss.
-
-**Device-adaptive delivery** — runtime fingerprinting selects the optimal quality tier for each device.
-
-**Automatic format conversion** — AVIF, WebP, and JPEG sources in a `<picture>` element.
-
-**Predictive lazy loading** — scroll velocity sampling dynamically adjusts the preload distance.
-
-**Blur-up placeholders** — 32×32 WebP base64 with CSS fade-in.
-
-**CLS prevention** — fixed-aspect-ratio container from image metadata.
+- **Perceptually-optimized quality** — 64×64 tile saliency drives quality per region. Faces, text, and detail get higher quality; backgrounds compress harder.
+- **Saliency-driven preprocessing** — important tiles are sharpened before encoding, preserving detail where it matters.
+- **Skin-tone face detection** — automatic quality boost around skin-colored regions. Zero extra dependencies.
+- **SSIM auto-tune** — finds the lowest quality where SSIM >= 0.97, saving 20–40% file size with no visible loss.
+- **Device-adaptive delivery** — runtime fingerprinting selects the optimal quality tier for each device.
+- **Automatic format conversion** — AVIF, WebP, and JPEG sources in a `<picture>` element.
+- **Predictive lazy loading** — scroll velocity sampling dynamically adjusts the preload distance.
+- **Blur-up placeholders** — 32×32 WebP base64 with CSS fade-in.
+- **CLS prevention** — fixed-aspect-ratio container from image metadata.
+- **SVG optimization** — automatic SVGO compression with security sanitization.
 
 ---
 
 ## Install
 
 ```bash
-npm install gotodev-image-optimizer
+npm install vite-image-react
 ```
 
 ---
@@ -71,12 +65,12 @@ npm install gotodev-image-optimizer
 // vite.config.ts
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import gotodevImageOptimizer from 'gotodev-image-optimizer/vite-plugin'
+import viteImageReact from 'vite-image-react/vite-plugin'
 
 export default defineConfig({
   plugins: [
     react(),
-    gotodevImageOptimizer(),
+    viteImageReact(),
   ],
 })
 ```
@@ -84,7 +78,7 @@ export default defineConfig({
 ### React component
 
 ```tsx
-import GImage from 'gotodev-image-optimizer'
+import GImage from 'vite-image-react'
 import hero from './hero.jpg'
 
 function Page() {
@@ -108,7 +102,7 @@ All standard `<img>` props work: `className`, `style`, `onLoad`, `onError`, `loa
 ### Plugin options
 
 ```ts
-gotodevImageOptimizer({
+viteImageReact({
   tiers?: Partial<Record<QualityTier, TierConfig>>
   adaptive?: boolean          // default: true
   autoTune?: boolean          // default: true
@@ -138,9 +132,9 @@ interface GImageProps {
 
 ---
 
-## Comparison: next/image vs GImage
+## Comparison: next/image vs vite-image-react
 
-| Aspect | next/image | GImage |
+| Aspect | next/image | vite-image-react |
 |---|---|---|
 | **Quality strategy** | Uniform (e.g. 75) | Perceptually-weighted — important regions drive quality |
 | **Preprocessing** | None | Saliency-guided sharpen — detail preserved where it matters |
@@ -149,6 +143,7 @@ interface GImageProps {
 | **Device adaptation** | Responsive srcSet only | Runtime tier switching — CPU/memory/connection-aware |
 | **Predictive loading** | Fixed threshold | Velocity-adaptive — faster scroll = bigger preload zone |
 | **Format pipeline** | AVIF/WebP/JPEG | Same + skin detection + selectable preprocessor |
+| **SVG optimization** | None | SVGO integration with security sanitization |
 
 ---
 

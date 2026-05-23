@@ -1,11 +1,11 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import gotodevImageOptimizer from '../src/vite-plugin.ts'
+import viteImageReact from '../src/vite-plugin.ts'
 
 export default defineConfig({
   plugins: [
     react(),
-    gotodevImageOptimizer({
+    viteImageReact({
       adaptive: true,
       autoTune: true,
       formats: ['avif', 'webp', 'jpeg'],

@@ -1,6 +1,6 @@
 {
-  "name": "gotodev-image-optimizer",
-  "version": "0.1.4",
+  "name": "vite-image-react",
+  "version": "0.2.0",
   "description": "Content-aware, device-adaptive image optimizer for React + Vite projects",
   "type": "module",
   "exports": {
@@ -24,7 +24,7 @@
     "preview": "vite preview playground",
     "typecheck": "tsc --noEmit",
     "lint": "biome check src/",
-    "lint:fix": "biome check --apply src/",
+    "lint:fix": "biome check --write src/",
     "test": "vitest run",
     "test:watch": "vitest",
     "prepare": "echo 'ready'"
@@ -32,13 +32,14 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ezitounioussama/gotodev-image-optimizer.git"
+    "url": "https://github.com/ezitounioussama/vite-image-react.git"
   },
   "engines": {
     "node": ">=22"
   },
   "dependencies": {
-    "sharp": "^0.34.5"
+    "sharp": "^0.34.5",
+    "svgo": "^3.3.3"
   },
   "peerDependencies": {
     "react": "^19.0.0",

@@ -1,3 +1,5 @@
+import { optimize } from 'svgo'
+
 export function sanitizeSvg(input: string): string {
   let sanitized = input
 
@@ -14,6 +16,34 @@ export function sanitizeSvg(input: string): string {
   sanitized = sanitized.replace(/new\s+Function\s*\(/gi, '')
   sanitized = sanitized.replace(/setTimeout\s*\(/gi, '')
   sanitized = sanitized.replace(/setInterval\s*\(/gi, '')
+
+  try {
+    const result = optimize(sanitized, {
+      multipass: true,
+      plugins: [
+        {
+          name: 'preset-default',
+          params: {
+            overrides: {
+              convertShapeToPath: false,
+              cleanupIds: false,
+            },
+          },
+        },
+        'removeDimensions',
+        'sortAttrs',
+        'removeStyleElement',
+        'removeScriptElement',
+        {
+          name: 'removeAttrs',
+          params: { attrs: ['data-*', 'class'] },
+        },
+      ],
+    })
+    if (result.data) {
+      sanitized = result.data
+    }
+  } catch {}
 
   return sanitized
 }

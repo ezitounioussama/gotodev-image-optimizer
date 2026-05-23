@@ -3,7 +3,7 @@ import { GImage } from '../../src/index.ts'
 export default function App() {
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto', padding: 24 }}>
-      <h1>gotodev-image-optimizer Playground</h1>
+      <h1>vite-image-react Playground</h1>
       <p style={{ marginBottom: 32 }}>
         Images below are auto-optimized via the Vite plugin.
         Open DevTools → Network to see AVIF/WebP variants being served.

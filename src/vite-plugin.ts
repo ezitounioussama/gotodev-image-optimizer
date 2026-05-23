@@ -14,7 +14,7 @@ const DEFAULT_TIERS: Record<QualityTier, TierConfig> = {
   low: { quality: 40, widths: [480] },
 }
 
-export default function gotodevImageOptimizer(userOptions: PluginOptions = {}): Plugin {
+export default function viteImageReact(userOptions: PluginOptions = {}): Plugin {
   let config: ResolvedConfig
   let manifest = createManifest()
   const options: PluginOptions = {
@@ -29,7 +29,7 @@ export default function gotodevImageOptimizer(userOptions: PluginOptions = {}): 
   }
 
   return {
-    name: 'gotodev-image-optimizer',
+    name: 'vite-image-react',
     enforce: 'post',
 
     configResolved(resolved: ResolvedConfig) {
@@ -69,7 +69,7 @@ export default function gotodevImageOptimizer(userOptions: PluginOptions = {}): 
         addToManifest(manifest, key, entry)
 
         if (options.verbose) {
-          console.log(`[gotodev-image-optimizer] Optimized: ${key}`)
+          console.log(`[vite-image-react] Optimized: ${key}`)
         }
 
         const manifestData = JSON.stringify(entry)
@@ -82,7 +82,7 @@ export default function gotodevImageOptimizer(userOptions: PluginOptions = {}): 
         }
       } catch (error) {
         if (options.verbose) {
-          console.error(`[gotodev-image-optimizer] Failed to optimize ${id}:`, error)
+          console.error(`[vite-image-react] Failed to optimize ${id}:`, error)
         }
         return {
           code: `export default ${JSON.stringify({

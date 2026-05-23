@@ -10,4 +10,3 @@ export type {
   PluginOptions,
   QualityTier,
 } from './core/types.ts'
-

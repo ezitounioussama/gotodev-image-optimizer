@@ -112,6 +112,7 @@ export default function GImage({
         className={className}
         style={style}
         loading={priority ? 'eager' : (loadingProp ?? 'lazy')}
+        fetchPriority={priority ? 'high' : 'low'}
         onLoad={handleLoad}
         onError={handleError}
       />
@@ -125,9 +126,9 @@ export default function GImage({
   const tierVariants = metadata.variants.filter((v) => {
     const tierWidths: Record<QualityTier, number> = {
       ultra: 99999,
-      high: 1920,
-      medium: 1024,
-      low: 768,
+      high: 1024,
+      medium: 768,
+      low: 480,
     }
     return v.width <= tierWidths[tier]
   })
@@ -172,7 +173,7 @@ export default function GImage({
         width={metadata.width}
         height={metadata.height}
         loading={loadState.loaded && !priority ? 'lazy' : 'eager'}
-        fetchPriority={priority ? 'high' : undefined}
+        fetchPriority={priority ? 'high' : 'low'}
         decoding={priority ? 'auto' : 'async'}
         className={className}
         style={{
