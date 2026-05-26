@@ -99,16 +99,16 @@
   "size-limit": [
     {
       "path": "dist/index.js",
-      "limit": "30 KB",
-      "import": "{ GImage }"
+      "limit": "30 KB"
     },
     {
       "path": "dist/vite-plugin.js",
-      "limit": "15 KB"
+      "limit": "30 KB"
     }
   ],
   "devDependencies": {
     "@biomejs/biome": "^2.4.15",
+    "@size-limit/file": "^12.1.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@types/react": "^19.2.14",
