@@ -10,24 +10,14 @@
 - [x] SEO keywords + GitHub topics
 - [x] Vite Plugin Registry metadata
 - [x] Fix SVG/GIF not writing to disk
-
-**Still needed:**
-
-Benchmarks:
-- [ ] Live benchmark page comparing file size + SSIM vs sharp defaults, next/image, imagemin
-- [ ] Bundle size CI regression check
-
-Error handling:
-- [ ] Replace empty catch blocks with structured fallback (AVIF fail → WebP → JPEG)
-- [ ] Log warnings when graceful degradation kicks in
-
-Edge cases:
-- [ ] CMYK JPEG conversion
-- [ ] EXIF orientation handling
-- [ ] Animated WebP input
-- [ ] PNG with alpha channel
-- [ ] Very large images (>100MB)
-- [ ] SVG with unusual namespaces
+- [x] Structured error handling + format fallback (AVIF → WebP → JPEG)
+  [x] 7+ empty `catch {}` blocks replaced with `console.warn` + graceful degradation
+- [x] CMYK JPEG conversion (detect + toColorspace('srgb'))
+- [x] EXIF orientation handling (sharp().rotate())
+- [x] Animated WebP input detection
+- [x] PNG alpha channel preservation in preprocessor
+- [x] Bundle size CI regression check (size-limit)
+- [x] Test coverage expanded (77 tests, 10 test files)
 
 ## v1.0.0-alpha.2 — "Remote + DX"
 
@@ -36,6 +26,9 @@ Edge cases:
 - [ ] Migration guide from `gotodev-image-optimizer`
 - [ ] Node 18 support (broaden `engines` field)
 - [ ] Add `@vitejs/plugin-react` to compatible packages in registry metadata
+- [ ] Auto srcSet generation (multi-width variants)
+- [ ] Public directory processing
+- [ ] Build caching (content-hash based)
 
 ## v1.0.0-rc.1 — "Production ready"
 

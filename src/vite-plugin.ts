@@ -63,6 +63,7 @@ export default function viteImageReact(userOptions: PluginOptions = {}): Plugin 
           preprocess: options.preprocess ?? true,
           faceDetection: options.faceDetection ?? true,
           outDir,
+          verbose: options.verbose,
         })
 
         const key = basename(id)
@@ -81,8 +82,11 @@ export default function viteImageReact(userOptions: PluginOptions = {}): Plugin 
           map: null,
         }
       } catch (error) {
+        console.warn(
+          `[vite-image-react] Failed to optimize ${basename(id)} — falling back to unoptimized image`,
+        )
         if (options.verbose) {
-          console.error(`[vite-image-react] Failed to optimize ${id}:`, error)
+          console.error(`[vite-image-react]   ${error instanceof Error ? error.message : error}`)
         }
         return {
           code: `export default ${JSON.stringify({

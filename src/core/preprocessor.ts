@@ -15,6 +15,9 @@ export async function preprocessImage(
 
   const composites: { input: Buffer; top: number; left: number }[] = []
 
+  const meta = await sharp(imagePath).metadata()
+  const hasAlpha = meta.channels ? meta.channels >= 4 : false
+
   for (const tile of importantTiles) {
     const tileLeft = tile.x * tileSize
     const tileTop = tile.y * tileSize
@@ -51,8 +54,17 @@ export async function preprocessImage(
     return sharp(imagePath).png().toBuffer()
   }
 
-  return sharp(imagePath)
-    .composite(composites.map((c) => ({ input: c.input, top: c.top, left: c.left })))
-    .png()
-    .toBuffer()
+  const base = sharp(imagePath)
+  if (hasAlpha) {
+    base.ensureAlpha()
+  }
+  const compositeResult = base.composite(
+    composites.map((c) => ({ input: c.input, top: c.top, left: c.left })),
+  )
+
+  if (hasAlpha) {
+    return compositeResult.png().toBuffer()
+  }
+
+  return compositeResult.png().toBuffer()
 }

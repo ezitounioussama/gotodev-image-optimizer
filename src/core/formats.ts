@@ -87,7 +87,28 @@ export function isRasterFormat(format: ImageFormat): boolean {
 }
 
 export function isAnimatedFormat(format: ImageFormat): boolean {
-  return format === 'gif'
+  return format === 'gif' || format === 'webp'
+}
+
+let _animatedWebpCache = new WeakMap<Uint8Array, boolean>()
+
+export async function isAnimatedWebp(buffer: Uint8Array): Promise<boolean> {
+  if (_animatedWebpCache.has(buffer)) {
+    return _animatedWebpCache.get(buffer) ?? false
+  }
+  try {
+    const { default: sharp } = await import('sharp')
+    const metadata = await sharp(Buffer.from(buffer)).metadata()
+    const result = metadata.pages !== undefined && metadata.pages > 1
+    _animatedWebpCache.set(buffer, result)
+    return result
+  } catch {
+    return false
+  }
+}
+
+export function clearFormatCache(): void {
+  _animatedWebpCache = new WeakMap()
 }
 
 export function outputFormatsFrom(format: ImageFormat): OutputFormat[] {

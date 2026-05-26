@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { detectFormat, getMimeType, isRasterFormat, isAnimatedFormat, outputFormatsFrom } from '../src/core/formats.ts'
+import { getMimeType, isAnimatedFormat, outputFormatsFrom, getExtension, isRasterFormat } from '../src/core/formats.ts'
+import type { ImageFormat } from '../src/core/types.ts'
 
 describe('formats', () => {
   describe('detectFormat', () => {
@@ -22,6 +23,32 @@ describe('formats', () => {
       const buffer = new Uint8Array([0x00, 0x00, 0x00, 0x00])
       expect(detectFormat(buffer, 'png')).toBe('png')
     })
+
+    it('detects GIF by magic bytes', () => {
+      const buffer = new Uint8Array([0x47, 0x49, 0x46, 0x38, 0x39, 0x61])
+      expect(detectFormat(buffer, 'gif')).toBe('gif')
+    })
+
+    it('detects BMP by magic bytes', () => {
+      const buffer = new Uint8Array([0x42, 0x4D])
+      expect(detectFormat(buffer, 'bmp')).toBe('bmp')
+    })
+  })
+
+  describe('isAnimatedFormat', () => {
+    it('returns true for gif', () => {
+      expect(isAnimatedFormat('gif')).toBe(true)
+    })
+
+    it('returns true for webp', () => {
+      expect(isAnimatedFormat('webp')).toBe(true)
+    })
+
+    it('returns false for non-animated formats', () => {
+      expect(isAnimatedFormat('jpeg')).toBe(false)
+      expect(isAnimatedFormat('png')).toBe(false)
+      expect(isAnimatedFormat('avif')).toBe(false)
+    })
   })
 
   describe('getMimeType', () => {
@@ -30,6 +57,22 @@ describe('formats', () => {
       expect(getMimeType('webp')).toBe('image/webp')
       expect(getMimeType('avif')).toBe('image/avif')
       expect(getMimeType('svg')).toBe('image/svg+xml')
+      expect(getMimeType('png')).toBe('image/png')
+      expect(getMimeType('gif')).toBe('image/gif')
+    })
+
+    it('returns application/octet-stream for unknown formats', () => {
+      expect(getMimeType('unknown' as ImageFormat)).toBe('application/octet-stream')
+    })
+  })
+
+  describe('getExtension', () => {
+    it('returns correct extensions', () => {
+      expect(getExtension('jpeg')).toBe('jpg')
+      expect(getExtension('png')).toBe('png')
+      expect(getExtension('webp')).toBe('webp')
+      expect(getExtension('avif')).toBe('avif')
+      expect(getExtension('svg')).toBe('svg')
     })
   })
 
@@ -41,22 +84,17 @@ describe('formats', () => {
     it('returns true for raster formats', () => {
       expect(isRasterFormat('jpeg')).toBe(true)
       expect(isRasterFormat('png')).toBe(true)
-    })
-  })
-
-  describe('isAnimatedFormat', () => {
-    it('returns true for gif', () => {
-      expect(isAnimatedFormat('gif')).toBe(true)
-    })
-
-    it('returns false for non-animated', () => {
-      expect(isAnimatedFormat('jpeg')).toBe(false)
+      expect(isRasterFormat('webp')).toBe(true)
     })
   })
 
   describe('outputFormatsFrom', () => {
     it('returns avif/webp/jpeg for jpeg input', () => {
       expect(outputFormatsFrom('jpeg')).toEqual(['avif', 'webp', 'jpeg'])
+    })
+
+    it('returns avif/webp/jpeg for png input', () => {
+      expect(outputFormatsFrom('png')).toEqual(['avif', 'webp', 'jpeg'])
     })
 
     it('returns webp/jpeg for gif', () => {
@@ -68,3 +106,6 @@ describe('formats', () => {
     })
   })
 })
+
+// Need to import detectFormat here for the tests
+import { detectFormat } from '../src/core/formats.ts'
