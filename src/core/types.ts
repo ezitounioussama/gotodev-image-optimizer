@@ -19,6 +19,12 @@ export interface PluginOptions {
   verbose?: boolean
   preprocess?: boolean
   faceDetection?: boolean
+  remote?: RemoteOptions
+}
+
+export interface RemoteOptions {
+  domains: string[]
+  cacheDir?: string
 }
 
 export interface ImageVariant {

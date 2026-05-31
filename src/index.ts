@@ -9,4 +9,5 @@ export type {
   OutputFormat,
   PluginOptions,
   QualityTier,
+  RemoteOptions,
 } from './core/types.ts'

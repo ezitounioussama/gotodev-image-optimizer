@@ -98,6 +98,37 @@ function Page() {
 }
 ```
 
+### Remote images
+
+```ts
+// vite.config.ts
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import viteImageReact from 'vite-image-react/vite-plugin'
+
+export default defineConfig({
+  plugins: [
+    react(),
+    viteImageReact({
+      remote: {
+        domains: ['images.unsplash.com', 'cdn.example.com'],
+      },
+    }),
+  ],
+})
+```
+
+```tsx
+import GImage from 'vite-image-react'
+import hero from 'https://images.unsplash.com/photo-1234567890'
+
+function Page() {
+  return (
+    <GImage src={hero} alt="Remote hero" />
+  )
+}
+```
+
 All standard `<img>` props work: `className`, `style`, `onLoad`, `onError`, `loading`, etc.
 
 ---
@@ -116,6 +147,10 @@ viteImageReact({
   formats?: OutputFormat[]    // default: ['avif', 'webp', 'jpeg']
   maxFileSize?: number        // default: 52_428_800 (50MB)
   verbose?: boolean           // default: false
+  remote?: {
+    domains: string[]         // allowed remote image domains (e.g. ['images.unsplash.com'])
+    cacheDir?: string         // cache directory (default: node_modules/.cache/vite-image-react)
+  }
 })
 ```
 

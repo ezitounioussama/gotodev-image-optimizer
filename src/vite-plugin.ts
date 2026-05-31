@@ -1,8 +1,9 @@
-import { existsSync, mkdirSync } from 'node:fs'
-import { basename, extname, resolve } from 'node:path'
+import { existsSync, mkdirSync, readdirSync, statSync } from 'node:fs'
+import { basename, dirname, extname, join, relative, resolve } from 'node:path'
 import type { Plugin, ResolvedConfig } from 'vite'
 import { encodeImage } from './core/encoder.ts'
 import { addToManifest, createManifest, writeManifest } from './core/manifest.ts'
+import { downloadRemoteImage, isRemoteUrl } from './core/remote.ts'
 import type { PluginOptions, QualityTier, TierConfig } from './core/types.ts'
 
 const IMAGE_EXTENSIONS = /\.(jpe?g|png|webp|avif|gif|svg|bmp|tiff?|ico)$/i
@@ -26,6 +27,7 @@ export default function viteImageReact(userOptions: PluginOptions = {}): Plugin 
     formats: userOptions.formats ?? ['avif', 'webp', 'jpeg'],
     maxFileSize: userOptions.maxFileSize ?? 50 * 1024 * 1024,
     verbose: userOptions.verbose ?? false,
+    remote: userOptions.remote,
   }
 
   return {
@@ -38,6 +40,11 @@ export default function viteImageReact(userOptions: PluginOptions = {}): Plugin 
 
     async buildStart() {
       manifest = createManifest()
+
+      const publicDir = config.publicDir
+      if (publicDir && existsSync(publicDir)) {
+        await processPublicDir(publicDir, options, config)
+      }
     },
 
     async transform(_code: string, id: string) {
@@ -50,11 +57,34 @@ export default function viteImageReact(userOptions: PluginOptions = {}): Plugin 
       }
 
       const tiers = options.tiers as Record<QualityTier, TierConfig>
-
       const formats = options.formats ?? (['avif', 'webp', 'jpeg'] as const)
 
+      let imagePath = id
+
+      if (isRemoteUrl(id)) {
+        if (!options.remote) {
+          if (options.verbose) {
+            console.warn(
+              `[vite-image-react] Remote image "${id}" found but no remote config (add \`remote: { domains: [...] }\`)`,
+            )
+          }
+          return
+        }
+        try {
+          imagePath = await downloadRemoteImage(id, options.remote)
+          if (options.verbose) {
+            console.log(`[vite-image-react] Downloaded remote: ${id}`)
+          }
+        } catch (error) {
+          console.warn(
+            `[vite-image-react] Failed to download remote image ${id}: ${error instanceof Error ? error.message : error}`,
+          )
+          return
+        }
+      }
+
       try {
-        const entry = await encodeImage(id, {
+        const entry = await encodeImage(imagePath, {
           widths: tiers.high.widths,
           formats: [...formats],
           tiers,
@@ -66,7 +96,7 @@ export default function viteImageReact(userOptions: PluginOptions = {}): Plugin 
           verbose: options.verbose,
         })
 
-        const key = basename(id)
+        const key = basename(imagePath)
         addToManifest(manifest, key, entry)
 
         if (options.verbose) {
@@ -83,17 +113,17 @@ export default function viteImageReact(userOptions: PluginOptions = {}): Plugin 
         }
       } catch (error) {
         console.warn(
-          `[vite-image-react] Failed to optimize ${basename(id)} — falling back to unoptimized image`,
+          `[vite-image-react] Failed to optimize ${basename(imagePath)} — falling back to unoptimized image`,
         )
         if (options.verbose) {
           console.error(`[vite-image-react]   ${error instanceof Error ? error.message : error}`)
         }
         return {
           code: `export default ${JSON.stringify({
-            src: basename(id),
+            src: basename(imagePath),
             width: 0,
             height: 0,
-            format: extname(id).slice(1),
+            format: extname(imagePath).slice(1),
             placeholder: '',
             variants: [],
             tiers: {},
@@ -111,5 +141,66 @@ export default function viteImageReact(userOptions: PluginOptions = {}): Plugin 
       const manifestPath = resolve(outDir, 'gimage-manifest.json')
       writeManifest(manifest, manifestPath)
     },
+  }
+}
+
+function scanImages(dir: string): string[] {
+  const results: string[] = []
+  if (!existsSync(dir)) return results
+  const entries = readdirSync(dir)
+  for (const entry of entries) {
+    const fullPath = join(dir, entry)
+    const stat = statSync(fullPath)
+    if (stat.isDirectory()) {
+      results.push(...scanImages(fullPath))
+    } else if (IMAGE_EXTENSIONS.test(entry)) {
+      results.push(fullPath)
+    }
+  }
+  return results
+}
+
+async function processPublicDir(
+  publicDir: string,
+  options: PluginOptions,
+  config: ResolvedConfig,
+): Promise<void> {
+  const images = scanImages(publicDir)
+  if (images.length === 0) return
+
+  const outDir = resolve(config.root, config.build.outDir ?? 'dist')
+  const tiers = (options.tiers ?? {}) as Record<QualityTier, TierConfig>
+  const formats = options.formats ?? ['avif', 'webp', 'jpeg']
+
+  for (const imagePath of images) {
+    try {
+      const relPath = relative(publicDir, imagePath)
+      const imageOutDir = resolve(outDir, dirname(relPath))
+      if (!existsSync(imageOutDir)) {
+        mkdirSync(imageOutDir, { recursive: true })
+      }
+
+      await encodeImage(imagePath, {
+        widths: tiers.high?.widths ?? [480, 768, 1024, 1920],
+        formats: [...formats],
+        tiers,
+        autoTune: options.autoTune ?? true,
+        adaptive: options.adaptive ?? true,
+        preprocess: options.preprocess ?? true,
+        faceDetection: options.faceDetection ?? true,
+        outDir: imageOutDir,
+        verbose: options.verbose,
+      })
+
+      if (options.verbose) {
+        console.log(`[vite-image-react] Optimized public: ${relPath}`)
+      }
+    } catch (error) {
+      if (options.verbose) {
+        console.warn(
+          `[vite-image-react] Failed to optimize public image ${imagePath}: ${error instanceof Error ? error.message : error}`,
+        )
+      }
+    }
   }
 }

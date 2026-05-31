@@ -33,7 +33,6 @@ export function sanitizeSvg(input: string): string {
         'removeDimensions',
         'sortAttrs',
         'removeStyleElement',
-        'removeScriptElement',
         {
           name: 'removeAttrs',
           params: { attrs: ['data-*', 'class'] },
